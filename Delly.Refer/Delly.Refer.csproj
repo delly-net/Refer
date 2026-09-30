@@ -12,15 +12,13 @@
 		<PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>
 	</PropertyGroup>
 
+	<!-- 本项目是多目标（TargetFrameworks），Pack 在外层构建执行，此时默认 None 通配项为空，
+	     必须用 Include 显式声明。若改用 Update，Pack 元数据不生效，打包会报 NU5046。 -->
 	<ItemGroup>
-	  <None Update="README.md">
-	    <Pack>True</Pack>
-	    <PackagePath>\</PackagePath>
-	  </None>
-	  <None Update="ref_256.png">
-	    <Pack>True</Pack>
-	    <PackagePath>\</PackagePath>
-	  </None>
+	  <None Remove="README.md" />
+	  <None Remove="ref_256.png" />
+	  <None Include="README.md" Pack="True" PackagePath="\" />
+	  <None Include="ref_256.png" Pack="True" PackagePath="\" />
 	</ItemGroup>
 
 </Project>
