@@ -25,7 +25,11 @@ namespace Delly.Refer
         /// </summary>
         /// <param name="args">构造函数参数数组</param>
         /// <returns>模型类型的新实例</returns>
+#if NET6_0_OR_GREATER
+        object CreateInstance(params object?[] args);
+#else
         object CreateInstance(params object[] args);
+#endif
 
         /// <summary>
         /// 模型类型信息，源生成阶段使用 typeof(T) 赋值
