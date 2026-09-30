@@ -1,0 +1,36 @@
+using System;
+
+namespace Delly.Refer.BasicRefers
+{
+    /// <summary>
+    /// <see cref="string" /> 数组类型引用
+    /// </summary>
+    /// <remarks>
+    /// <see cref="string" /> 虽为引用类型，但其 <see cref="ValueReferBase{T}" /> 视同基础类型
+    /// （<see cref="IRefer.IsValue" /> 为 true）；数组本身仍按引用类型建模，
+    /// 故本类的 <see cref="IRefer.IsValue" /> 返回 <see langword="false" />、<see cref="IRefer.IsArray" /> 返回 <see langword="true" />。
+    /// </remarks>
+    public sealed class StringArrayRefer : ArrayReferBase<string>
+    {
+        /// <summary>
+        /// <see cref="string" /> 数组类型引用实例
+        /// </summary>
+        public static readonly StringArrayRefer Instance = new StringArrayRefer();
+
+        /// <summary>
+        /// 创建数组类型的新实例
+        /// </summary>
+        /// <param name="args">构造函数参数数组；无参或 <see langword="null" /> 时返回长度 0 的空数组，单个 <see cref="int" /> 参数时返回该长度的数组</param>
+        /// <returns><see cref="string" /> 类型的新数组（元素为 <see langword="null" />）</returns>
+        /// <exception cref="ArgumentOutOfRangeException">长度为负时抛出</exception>
+        /// <exception cref="NotSupportedException">参数个数不为 0 或 1，或单个参数不是 <see cref="int" /> 时抛出</exception>
+#if NET6_0_OR_GREATER
+        public override object CreateInstance(params object?[] args)
+#else
+        public override object CreateInstance(params object[] args)
+#endif
+        {
+            return CreateArrayInstance(args);
+        }
+    }
+}

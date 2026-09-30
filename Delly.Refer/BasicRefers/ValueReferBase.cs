@@ -59,6 +59,18 @@ namespace Delly.Refer.BasicRefers
         }
 
         /// <summary>
+        /// 是否为数组对象，值类型引用恒为 <see langword="false" />
+        /// </summary>
+        /// <remarks>
+        /// 值类型引用均建模单个标量类型，不建模数组，故此处恒为 false；
+        /// 数组类型引用由 <see cref="ArrayReferBase{TElement}" /> 建模并返回 true。
+        /// </remarks>
+        public virtual bool IsArray
+        {
+            get { return false; }
+        }
+
+        /// <summary>
         /// 是否为泛型模型，值类型引用恒为 <see langword="false" />
         /// </summary>
         public virtual bool IsGeneric
@@ -88,8 +100,22 @@ namespace Delly.Refer.BasicRefers
         /// <returns>方法对象只读列表，值类型引用恒为空集合</returns>
         /// <remarks>
         /// 本项目元数据由源生成阶段固化而非运行时反射，故此处直接返回空集合。
+        /// 值类型不建模方法，恒为空集合，不可改写为 <c>typeof(T).GetMethods()</c> 之类的运行时反射。
         /// </remarks>
-        public virtual IReadOnlyList<IMethodRefer> GetMethods()
+        public virtual IReadOnlyList<IRefer> GetMethods()
+        {
+            return Array.Empty<IRefer>();
+        }
+
+        /// <summary>
+        /// 获取所有泛型引用
+        /// </summary>
+        /// <returns>泛型引用对象只读列表，值类型引用恒为空集合</returns>
+        /// <remarks>
+        /// 本项目元数据由源生成阶段固化而非运行时反射，故此处直接返回空集合。
+        /// 值类型引用均非泛型，不产生泛型引用，恒为空集合。
+        /// </remarks>
+        public virtual IReadOnlyList<IMethodRefer> GetGenericRefers()
         {
             return Array.Empty<IMethodRefer>();
         }

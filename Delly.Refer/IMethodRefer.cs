@@ -20,11 +20,6 @@ namespace Delly.Refer
         IRefer ReturnRefer { get; }
 
         /// <summary>
-        /// 返回类型信息，源生成阶段使用 typeof(T) 赋值
-        /// </summary>
-        Type ReturnType { get; }
-
-        /// <summary>
         /// 获取所有方法参数
         /// </summary>
         /// <returns>参数对象数组（无参数时返回空数组，永不返回 null）</returns>

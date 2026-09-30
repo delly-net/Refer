@@ -27,19 +27,24 @@ dotnet pack  Delly.Refer/Delly.Refer.csproj       # 核心库需显式打包
 
 **`Delly.Refer/`** — 运行时核心抽象层，多目标 `netstandard2.0;net6.0`，无任何第三方依赖（仅 BCL）。导出接口：
 
-- `IRefer` — 类型引用主接口。承载名称/命名空间、泛型元信息（`IsGeneric` / `IsGenericDefinition` / `GenericDefinitionCount`）、`CreateInstance` 工厂方法，以及 `GetMethods()` / `GetProperties()` / `GetAttributes()` 三个元数据查询入口。
+- `IRefer` — 类型引用主接口。承载名称/命名空间、类型标记（`IsValue` / `IsArray`）、泛型元信息（`IsGeneric` / `IsGenericDefinition` / `GenericDefinitionCount`）、`TypeCode`、`CreateInstance` 工厂方法，以及 `GetMethods()` / `GetGenericRefers()` / `GetProperties()` / `GetAttributes()` 四个元数据查询入口。注意 `GetMethods()` 返回 `IReadOnlyList<IRefer>`，`GetGenericRefers()` 返回 `IReadOnlyList<IMethodRefer>`，两者不可互换。
 - `IPropertyRefer` — 属性引用，持有 `Name` 与其自身的 `IRefer`（支持属性类型递归描述）。
 - `IMethodRefer` — 方法引用，承载 `Name` / `ReturnRefer` / `ReturnType` / `GetParameters()` / `Invoke()`；参数由 `IMethodReferParameter`（`Name` + `ParameterRefer`）描述。
 
-`Delly.Refer/BasicRefers/` 下是 `IRefer` 的 16 个基础值类型实现（`BooleanRefer`、`Int32Refer`、`StringRefer`、`GuidRefer` 等）：泛型抽象基类 `ValueReferBase<T>` 集中实现 `Name` / `Namespace` / `IsValue` / 三个泛型成员 / 三个元数据查询方法（恒返回空集合），`TypeCode` 与 `CreateInstance` 由各 `sealed` 子类自行实现。`CreateInstance` 语义：无参或 `null` 参返回 `default(T)`，带参抛 `NotSupportedException`（值类型无构造语义）。
+`Delly.Refer/BasicRefers/` 下是 `IRefer` 的基础实现，分两族、共 34 个文件，均以「泛型抽象基类 + 每类型一个 `sealed` 子类 + `public static readonly XxxRefer Instance` 单例」组织，基类集中实现公共成员、子类只承载差异化部分（`TypeCode` 与/或 `CreateInstance` override，决策 #315）：
+
+- **值类型族**（16 个）：`BooleanRefer`、`Int32Refer`、`StringRefer`、`GuidRefer` 等，均继承 `ValueReferBase<T>`。`IsValue` 为 `true`（`StringRefer` 同）、`IsArray` 为 `false`、非泛型；`CreateInstance` 无参或 `null` 参返回 `default(T)`，带参抛 `NotSupportedException`（值类型无构造语义）。
+- **数组族**（16 个）：`BooleanArrayRefer` … `GuidArrayRefer`，均继承 `ArrayReferBase<TElement>`，建模 `TElement[]`。`IsArray` 为 `true`、`IsValue` 为 `false`、`TypeCode` 统一为 `TypeCode.Object`（`System.TypeCode` 无数组专用成员，与 `GuidRefer` 的取舍一致）、非泛型；`CreateInstance` 语义：无参或 `null` 参返回长度 0 的空数组，单个 `int` 参数返回该长度的数组（负数抛 `ArgumentOutOfRangeException`、非 `int` 抛 `NotSupportedException`），参数个数为 2 及以上抛 `NotSupportedException`。
+
+两族的元数据查询方法均恒返回空集合（手工 `Array.Empty<T>()`，基类复用同一实例，**永不使用运行时反射**）。
 
 **`Delly.Refer.Generator/`** — Roslyn 源生成器（`netstandard2.0` + `IsRoslynComponent=true`），意图是在编译期为用户的模型类型生成 `IRefer` 实现。**当前仅有 `Class1.cs` 空占位类，尚未实现**。
 
-**`Delly.Refer.Tests/`** — xUnit 单元测试（单目标 `net6.0`，`IsPackable=false`），覆盖 BasicRefers 的 `CreateInstance` 语义与固定契约（泛型标记、名称/命名空间、空元数据实例复用、`TypeCode` 映射）。
+**`Delly.Refer.Tests/`** — xUnit 单元测试（单目标 `net6.0`，`IsPackable=false`），覆盖 BasicRefers 的 `CreateInstance` 语义与固定契约（类型/泛型标记、名称/命名空间、空元数据实例复用、`TypeCode` 映射）：值类型族见 `CreateInstanceTests` / `BasicRefersContractTests`，数组族见 `ArrayReferContractTests`。
 
 ### 核心设计意图
 
-`IRefer` 的元数据由源生成阶段固化而非运行时反射：`IRefer.cs:32` 的注释明确写道「模型类型信息，源生成阶段使用 `typeof(T)` 赋值」。因此接口上的泛型判定（`IsGeneric` / `IsGenericDefinition` / `GenericDefinitionCount`）应当由生成器在编译期静态计算并输出为常量属性，而非依赖 `Type` 的运行时查询。修改这些成员时需保持这一前提。
+`IRefer` 的元数据由源生成阶段固化而非运行时反射——`ValueReferBase<T>` / `ArrayReferBase<TElement>` 的类注释均明确「元数据由源生成阶段固化，本基类不进行任何运行时反射」，基础实现也一律以手工空集合与常量属性体现。因此接口上的泛型判定（`IsGeneric` / `IsGenericDefinition` / `GenericDefinitionCount`）与类型标记（`IsValue` / `IsArray`）应当由生成器在编译期静态计算并输出为常量属性，而非依赖 `Type` 的运行时查询。修改这些成员时需保持这一前提。
 
 ## 约定与易错点
 
@@ -53,7 +58,8 @@ dotnet pack  Delly.Refer/Delly.Refer.csproj       # 核心库需显式打包
 
 ## 已知待办
 
-1. `IRefer.TypeCode` 的属性类型存疑：声明为 `TypeCode`（`using System;` 下解析为 `System.TypeCode` 枚举），但注释称由 `typeof(T)` 赋值——后者返回 `System.Type`，类型不匹配。实现生成器前需先澄清是改为 `Type` 还是新增自定义 `TypeCode` 类型。
+1. `IRefer.TypeCode` 的属性类型已澄清为 `System.TypeCode` 枚举——接口注释已由「模型类型信息，源生成阶段使用 `typeof(T)` 赋值」改为「类型编码枚举」，不再与 `typeof(T)`（`System.Type`）冲突。遗留问题是该枚举无法表达自定义模型类型与数组类型（`typeof(int[]).GetTypeCode()` 亦为 `TypeCode.Object`），生成器实现时需统一裁决是否改为 `Type` 或新增自定义类型编码类型——属破坏性变更，需独立评估。
 2. 生成器项目尚未声明 `ProjectReference` 引用核心库，也未显式引用 Roslyn 分析器包（`Microsoft.CodeAnalysis.CSharp`）。
-3. `IMethodRefer` 已补齐 `Name` / `ReturnRefer` / `ReturnType` / `GetParameters()` / `Invoke()` 成员（`IMethodReferParameter` 为新增参数接口），但 `ValueReferBase<T>.GetMethods()` 仍恒返回空集合——值类型不建模方法，待源生成器有真实方法建模后同步跟进。
+3. `IMethodRefer` 已补齐 `Name` / `ReturnRefer` / `ReturnType` / `GetParameters()` / `Invoke()` 成员（`IMethodReferParameter` 为新增参数接口），但 `ValueReferBase<T>` / `ArrayReferBase<TElement>` 的 `GetMethods()` 与 `GetGenericRefers()` 仍恒返回空集合——基础类型不建模方法与泛型引用，待源生成器有真实建模后同步跟进。
 4. `StringRefer.CreateInstance()` 返回 `default(string)`（即 `null`），与 `IRefer.CreateInstance` 在 `net6.0` 下的非空返回注解不符，现以 null 宽容运算符局部规避。若需改为「非 null 空串」语义，或把返回类型改为 `object?`，均属破坏性变更，需独立评估。
+5. 数组族仅覆盖 16 个基础类型的一维数组，且 `ArrayReferBase<TElement>` 未建模元素类型（无 `ElementRefer` 属性，元素类型只能从 `Name` 反推）。多维/锯齿数组、自定义元素类型数组及元素引用建模，待源生成器阶段统一扩展。

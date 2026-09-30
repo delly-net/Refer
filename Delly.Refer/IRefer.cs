@@ -32,7 +32,7 @@ namespace Delly.Refer
 #endif
 
         /// <summary>
-        /// 模型类型信息，源生成阶段使用 typeof(T) 赋值
+        /// 类型编码枚举
         /// </summary>
         TypeCode TypeCode { get; }
 
@@ -40,6 +40,11 @@ namespace Delly.Refer
         /// 是否为值类型对象，基础值类型和 string 为 true，其他 class 类型为 false
         /// </summary>
         bool IsValue { get; }
+
+        /// <summary>
+        /// 是否为数组对象
+        /// </summary>
+        bool IsArray { get; }
 
         /// <summary>
         /// 是否为泛型模型
@@ -73,7 +78,13 @@ namespace Delly.Refer
         /// 获取所有方法
         /// </summary>
         /// <returns>方法对象只读列表</returns>
-        IReadOnlyList<IMethodRefer> GetMethods();
+        IReadOnlyList<IRefer> GetMethods();
+
+        /// <summary>
+        /// 获取所有泛型引用
+        /// </summary>
+        /// <returns>方法对象只读列表</returns>
+        IReadOnlyList<IMethodRefer> GetGenericRefers();
 
         /// <summary>
         /// 获取所有属性

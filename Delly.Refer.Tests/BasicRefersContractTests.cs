@@ -65,6 +65,7 @@ namespace Delly.Refer.Tests
             foreach (IRefer refer in AllRefers)
             {
                 Assert.True(refer.IsValue, refer.Name + " 的 IsValue 应为 true");
+                Assert.False(refer.IsArray, refer.Name + " 的 IsArray 应为 false");
                 Assert.False(refer.IsGeneric, refer.Name + " 的 IsGeneric 应为 false");
                 Assert.False(refer.IsGenericDefinition, refer.Name + " 的 IsGenericDefinition 应为 false");
                 Assert.Equal(0, refer.GenericDefinitionCount);
@@ -90,6 +91,7 @@ namespace Delly.Refer.Tests
             foreach (IRefer refer in AllRefers)
             {
                 Assert.Empty(refer.GetMethods());
+                Assert.Empty(refer.GetGenericRefers());
                 Assert.Empty(refer.GetProperties());
                 Assert.Empty(refer.GetAttributes());
             }
@@ -101,13 +103,15 @@ namespace Delly.Refer.Tests
         [Fact]
         public void EmptyMetadata_ReusesSameInstanceAcrossRefers()
         {
-            IReadOnlyList<IMethodRefer> methods = AllRefers[0].GetMethods();
+            IReadOnlyList<IRefer> methods = AllRefers[0].GetMethods();
+            IReadOnlyList<IMethodRefer> genericRefers = AllRefers[0].GetGenericRefers();
             IReadOnlyList<IPropertyRefer> properties = AllRefers[0].GetProperties();
             IReadOnlyList<Attribute> attributes = AllRefers[0].GetAttributes();
 
             foreach (IRefer refer in AllRefers)
             {
                 Assert.Same(methods, refer.GetMethods());
+                Assert.Same(genericRefers, refer.GetGenericRefers());
                 Assert.Same(properties, refer.GetProperties());
                 Assert.Same(attributes, refer.GetAttributes());
             }
