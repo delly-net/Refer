@@ -1,12 +1,20 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
 		<TargetFramework>netstandard2.0</TargetFramework>
+		<LangVersion>latest</LangVersion>
+		<Nullable>enable</Nullable>
 		<EnforceExtendedAnalyzerRules>true</EnforceExtendedAnalyzerRules>
 		<UseRoslynAnalyzers>true</UseRoslynAnalyzers>
 		<GeneratePackageOnBuild>True</GeneratePackageOnBuild>
 		<IsRoslynComponent>true</IsRoslynComponent>
 		<IsPackable>true</IsPackable>
+		<!-- 分析器包不投放 lib/，DLL 由下方 ItemGroup 显式放入 analyzers/dotnet/cs -->
+		<IncludeBuildOutput>false</IncludeBuildOutput>
+		<!-- 分析器包无 lib 产物，抑制 NU5128（缺 lib/ref 与依赖组一致性告警） -->
+		<!-- NU5128：分析器包无 lib 产物；RS2008：本项目不维护 AnalyzerReleases.*.md 发布跟踪文件；
+		     RS1033：规则只认半角句点，识别不了中文全角句号「。」，而本项目诊断文案统一使用中文 -->
+		<NoWarn>$(NoWarn);NU5128;RS2008;RS1033</NoWarn>
 		<Authors>Delly.Net</Authors>
 		<Version>1.0.2609.1</Version>
 		<PackageReadmeFile>README.md</PackageReadmeFile>
@@ -15,6 +23,11 @@
 		<PackageLicenseExpression>MIT</PackageLicenseExpression>
 		<PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>
 	</PropertyGroup>
+
+	<!-- Roslyn 分析器 SDK：仅编译期需要，不流向宿主项目 -->
+	<ItemGroup>
+		<PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.12.0" PrivateAssets="all" />
+	</ItemGroup>
 
 	<ItemGroup>
 		<None Update="README.md">
@@ -25,6 +38,8 @@
 			<Pack>True</Pack>
 			<PackagePath>\</PackagePath>
 		</None>
+		<!-- 分析器必须以 analyzers/dotnet/cs 路径入包，宿主项目才能作为 Roslyn 分析器加载 -->
+		<None Include="$(OutputPath)\$(AssemblyName).dll" Pack="True" PackagePath="analyzers/dotnet/cs" Visible="false" />
 	</ItemGroup>
 
 </Project>

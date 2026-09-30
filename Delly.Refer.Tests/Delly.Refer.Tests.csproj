@@ -12,10 +12,23 @@
 		<PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.11.1" />
 		<PackageReference Include="xunit" Version="2.9.2" />
 		<PackageReference Include="xunit.runner.visualstudio" Version="2.8.2" />
+		<!-- 与生成器引用的 Roslyn 版本一致，供 CSharpGeneratorDriver 驱动式测试使用 -->
+		<PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.12.0" />
 	</ItemGroup>
 
 	<ItemGroup>
 		<ProjectReference Include="..\Delly.Refer\Delly.Refer.csproj" />
+		<!-- 以分析器方式接入生成器：本测试项目自身即为真实宿主，可断言生成产物行为 -->
+		<ProjectReference Include="..\Delly.Refer.Generator\Delly.Refer.Generator.csproj"
+		                  OutputItemType="Analyzer"
+		                  ReferenceOutputAssembly="false" />
+		<!-- 同一程序集另作普通引用：驱动式测试需在代码中构造 ReferGenerator 实例。
+		     ProjectReference 的 OutputItemType 只能取单一值，故此处显式引用其产物；
+		     顺序由上方 ProjectReference 保证（ResolveProjectReferences 先于 ResolveAssemblyReferences）。 -->
+		<Reference Include="Delly.Refer.Generator">
+			<HintPath>..\Delly.Refer.Generator\bin\$(Configuration)\netstandard2.0\Delly.Refer.Generator.dll</HintPath>
+			<Private>true</Private>
+		</Reference>
 	</ItemGroup>
 
 </Project>
