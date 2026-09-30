@@ -1,0 +1,30 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<TargetFramework>netstandard2.0</TargetFramework>
+		<EnforceExtendedAnalyzerRules>true</EnforceExtendedAnalyzerRules>
+		<UseRoslynAnalyzers>true</UseRoslynAnalyzers>
+		<GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+		<IsRoslynComponent>true</IsRoslynComponent>
+		<IsPackable>true</IsPackable>
+		<Authors>Delly.Net</Authors>
+		<Version>1.0.2609.1</Version>
+		<PackageReadmeFile>README.md</PackageReadmeFile>
+		<PackageIcon>ref_256.png</PackageIcon>
+		<RepositoryUrl>https://github.com/delly-net/Refer</RepositoryUrl>
+		<PackageLicenseExpression>MIT</PackageLicenseExpression>
+		<PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<None Update="README.md">
+			<Pack>True</Pack>
+			<PackagePath>\</PackagePath>
+		</None>
+		<None Update="ref_256.png">
+			<Pack>True</Pack>
+			<PackagePath>\</PackagePath>
+		</None>
+	</ItemGroup>
+
+</Project>
