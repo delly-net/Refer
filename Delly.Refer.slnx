@@ -1,4 +1,5 @@
 <Solution>
   <Project Path="Delly.Refer.Generator/Delly.Refer.Generator.csproj" Id="3f951ad1-d8dd-460a-ba09-0ae280d7c992" />
   <Project Path="Delly.Refer/Delly.Refer.csproj" />
+  <Project Path="Delly.Refer.Tests/Delly.Refer.Tests.csproj" />
 </Solution>
