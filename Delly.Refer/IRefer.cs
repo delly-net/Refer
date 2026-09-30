@@ -74,8 +74,13 @@ namespace Delly.Refer
         /// <summary>
         /// 获取所有属性
         /// </summary>
-        /// <returns>方法对象只读列表</returns>
+        /// <returns>属性对象只读列表</returns>
         IReadOnlyList<IPropertyRefer> GetProperties();
 
+        /// <summary>
+        /// 获取所有特性
+        /// </summary>
+        /// <returns>特性对象只读列表</returns>
+        IReadOnlyList<Attribute> GetAttributes();
     }
 }
