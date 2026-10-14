@@ -9,7 +9,12 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<ProjectReference Include="..\Delly.Refer.Generator\Delly.Refer.Generator.csproj" />
+		<!-- 以分析器方式接入生成器：编译期被 Roslyn 加载，为本项目产出 [UseRefer] 的 Refer 实现。
+		     缺少 OutputItemType="Analyzer" 时 MSBuild 只把它当普通运行时引用，源生成不会执行。 -->
+		<ProjectReference Include="..\Delly.Refer.Generator\Delly.Refer.Generator.csproj"
+		                  OutputItemType="Analyzer"
+		                  ReferenceOutputAssembly="false" />
+		<!-- 核心库是 Demo 的运行时依赖，保持普通引用 -->
 		<ProjectReference Include="..\Delly.Refer\Delly.Refer.csproj" />
 	</ItemGroup>
 
